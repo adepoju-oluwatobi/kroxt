@@ -1,0 +1,44 @@
+{
+  "name": "kroxt",
+  "version": "1.0.1",
+  "description": "A framework-agnostic modular auth engine",
+  "type": "module",
+  "main": "./dist-lib/index.js",
+  "module": "./dist-lib/index.js",
+  "types": "./dist-lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist-lib/index.d.ts",
+      "import": "./dist-lib/index.js"
+    },
+    "./adapter": {
+      "types": "./dist-lib/adapter.d.ts",
+      "import": "./dist-lib/adapter.js"
+    },
+    "./core": {
+      "types": "./dist-lib/core.d.ts",
+      "import": "./dist-lib/core.js"
+    },
+    "./providers": {
+      "types": "./dist-lib/providers.d.ts",
+      "import": "./dist-lib/providers.js"
+    },
+    "./memoryAdapter": {
+      "types": "./dist-lib/memoryAdapter.d.ts",
+      "import": "./dist-lib/memoryAdapter.js"
+    }
+  },
+  "files": [
+    "dist-lib",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "npx tsc src/auth/index.ts --outDir dist-lib --module nodenext --declaration"
+  },
+  "dependencies": {
+    "arctic": "^3.7.0",
+    "argon2": "^0.44.0",
+    "jose": "^6.2.1",
+    "zod": "^3.23.8"
+  }
+}
