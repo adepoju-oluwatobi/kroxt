@@ -1,6 +1,7 @@
 {
   "name": "kroxt",
-  "version": "1.0.1",
+  "version": "1.1.1",
+  "license": "MIT",
   "description": "A framework-agnostic modular auth engine",
   "type": "module",
   "main": "./dist-lib/index.js",
