@@ -1,6 +1,6 @@
 {
   "name": "kroxt",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "license": "MIT",
   "description": "A framework-agnostic modular auth engine",
   "type": "module",
