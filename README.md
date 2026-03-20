@@ -6,6 +6,7 @@ A framework-agnostic, modular authentication engine for modern TypeScript applic
 
 - 🔐 **Secure Hashing**: Powered by `argon2` for industry-standard password security.
 - 🎟️ **Dual-Token Sessions**: Native support for Access and Refresh tokens via `jose`.
+- 🧩 **JWT Customization**: Fully extensible payload with support for custom user fields and `sub` override.
 - 🌍 **OAuth Ready**: Built-in support for GitHub and Google OAuth via `arctic`.
 - 🧩 **Database Agnostic**: Use Mongoose, Prisma, Drizzle, or any store via the `AuthAdapter` pattern.
 - 🌶️ **Password Peppering**: Server-side pepper support for enhanced hash protection.
@@ -25,35 +26,60 @@ npm install kroxt
 
 This guide walks you through setting up Kroxt from scratch in your application.
 
-### Step 1: The Adapter Pattern
+### Step 1: Define your User
 
-Kroxt doesn't care which database you use. You just need to implement the `AuthAdapter` interface. 
-
-In this example, we use a simple user structure: `name`, `email`, and `password`.
-> [!NOTE]
-> Kroxt's adapter can accept **any** additional fields your application requires (e.g., `role`, `avatar`, `preferences`) with no limits.
+First, define what a User looks like in your system. Kroxt allows any additional fields (like `role`, `schoolId`, etc.) which you can later sign into your JWTs.
 
 ```typescript
-import type { AuthAdapter, User } from "kroxt/adapter";
+export interface MyUser {
+  id: string;
+  email: string;
+  passwordHash: string;
+  role: 'admin' | 'user';
+  schoolId: string;    // Custom field for enterprise/multi-tenant apps
+  oauthProvider?: string; // Support for OAuth (e.g., 'github')
+  oauthId?: string;       // Unique ID from the provider
+  name: string;
+}
+```
 
-export const myAdapter: AuthAdapter = {
+### Step 2: The Adapter Pattern
+
+Kroxt doesn't care which database you use. You just need to implement the `AuthAdapter` interface using your model. Here is a complete example using Mongoose:
+
+```typescript
+import type { AuthAdapter } from "kroxt/adapter";
+import { User } from "./models/user.model.js"; // Your Mongoose model
+import type { MyUser } from "./types.js";
+
+export const myAdapter: AuthAdapter<MyUser> = {
   createUser: async (data) => {
-    // Save to your DB: { name, email, passwordHash, ...anyOtherFields }
-    // return the created user including its unique id
+    const user = await User.create(data);
+    const obj = user.toObject();
+    return { ...obj, id: obj._id.toString() };
   },
   findUserByEmail: async (email) => {
-    // Find user by email in your DB
+    const user = await User.findOne({ email });
+    if (!user) return null;
+    const obj = user.toObject();
+    return { ...obj, id: obj._id.toString() };
   },
   findUserById: async (id) => {
-    // Find user by ID in your DB
+    const user = await User.findById(id);
+    if (!user) return null;
+    const obj = user.toObject();
+    return { ...obj, id: obj._id.toString() };
   },
-  linkOAuthAccount: async (user, provider, providerId) => {
-    // Link an OAuth provider to an existing user
+  linkOAuthAccount: async (userId, provider, providerId) => {
+    await User.findByIdAndUpdate(userId, {
+      oauthProvider: provider,
+      oauthId: providerId
+    });
   }
 };
 ```
 
-### Step 2: Initialize the Auth Engine
+### Step 3: Initialize the Auth Engine
 
 Configure Kroxt with your adapter and security settings.
 
@@ -68,11 +94,26 @@ export const auth = createAuth({
   session: {
     expires: "15m",        // Access token duration
     refreshExpires: "7d"   // Refresh token duration
+  },
+  jwt: {
+    /**
+     * Optional: Fully customize the JWT payload or add extra fields.
+     */
+    payload: (user, type) => {
+      // Only add extra details to 'access' tokens to keep 'refresh' tokens light.
+      if (type === "access") {
+        return {
+          schoolId: user.schoolId, // Add custom user detail
+          role: user.role,         // Explicitly include role
+        };
+      }
+      return {}; // Refresh tokens stay minimal
+    }
   }
 });
 ```
 
-### Step 3: Implement Controllers & Routes
+### Step 4: Implement Controllers & Routes
 
 Use the engine in your application logic. Examples below use an Express-like structure.
 

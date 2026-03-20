@@ -47,13 +47,13 @@ async function runTest() {
         nin: "12345678901",
     };
 
-    const { user, token } = await auth.signup(sampleRegisterData, "password123");
+    const { user, accessToken } = await auth.signup(sampleRegisterData, "password123");
     console.log("1. Signup successful!");
     console.log("Returned User:", { ...user, passwordHash: "***hidden***" });
-    console.log("Returned JWT Token:", token.substring(0, 30) + "...");
+    console.log("Returned JWT Token:", accessToken.substring(0, 30) + "...");
 
     // TEST JWT VERIFY
-    const payload = await auth.verifyToken(token);
+    const payload = await auth.verifyToken(accessToken);
     console.log("2. Token Verified! Payload:", payload);
 
     // TEST LOGIN
