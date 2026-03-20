@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/auth/providers.ts"],
+  "sourcesContent": ["import { GitHub as ArcticGitHub, Google as ArcticGoogle } from \"arctic\";\r\n\r\nexport interface ProviderConfig {\r\n    clientId: string;\r\n    clientSecret: string;\r\n    redirectURI?: string;\r\n}\r\n\r\nexport interface Provider {\r\n    id: string;\r\n    handler: any; // `arctic` provider instance\r\n}\r\n\r\nexport function GitHub(config: ProviderConfig): Provider {\r\n    return {\r\n        id: \"github\",\r\n        handler: new ArcticGitHub(config.clientId, config.clientSecret, null),\r\n    };\r\n}\r\n\r\nexport function Google(config: ProviderConfig): Provider {\r\n    if (!config.redirectURI) {\r\n        throw new Error(\"redirectURI is required for Google OAuth provider\");\r\n    }\r\n    return {\r\n        id: \"google\",\r\n        handler: new ArcticGoogle(\r\n            config.clientId,\r\n            config.clientSecret,\r\n            config.redirectURI\r\n        ),\r\n    };\r\n}\r\n"],
+  "mappings": "AAAA,SAAS,UAAU,cAAc,UAAU,oBAAoB;AAaxD,SAAS,OAAO,QAAkC;AACrD,SAAO;AAAA,IACH,IAAI;AAAA,IACJ,SAAS,IAAI,aAAa,OAAO,UAAU,OAAO,cAAc,IAAI;AAAA,EACxE;AACJ;AAEO,SAAS,OAAO,QAAkC;AACrD,MAAI,CAAC,OAAO,aAAa;AACrB,UAAM,IAAI,MAAM,mDAAmD;AAAA,EACvE;AACA,SAAO;AAAA,IACH,IAAI;AAAA,IACJ,SAAS,IAAI;AAAA,MACT,OAAO;AAAA,MACP,OAAO;AAAA,MACP,OAAO;AAAA,IACX;AAAA,EACJ;AACJ;",
+  "names": []
+}
