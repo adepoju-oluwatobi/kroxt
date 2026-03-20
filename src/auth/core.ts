@@ -13,6 +13,15 @@ export interface CreateAuthOptions {
         refreshExpires?: string | number; // For refresh tokens
     };
     providers?: Provider[];
+    jwt?: {
+        /**
+         * A callback to add custom fields to the JWT payload.
+         * It receives the user object and the token type ('access' or 'refresh').
+         * Return an object containing the fields to be merged into the payload.
+         * You can also override default fields like 'sub'.
+         */
+        payload?: (user: User<any>, type: "access" | "refresh") => Record<string, any>;
+    };
 }
 
 export function createAuth(options: CreateAuthOptions) {
@@ -25,7 +34,14 @@ export function createAuth(options: CreateAuthOptions) {
      * Generates a stateless JWT for a user session
      */
     async function generateToken(user: User<any>, type: "access" | "refresh" = "access") {
-        return new SignJWT({ sub: user.id, role: user.role, type })
+        let payload: Record<string, any> = { sub: user.id, role: user.role, type };
+
+        if (options.jwt?.payload) {
+            const customPayload = options.jwt.payload(user, type);
+            payload = { ...payload, ...customPayload };
+        }
+
+        return new SignJWT(payload)
             .setProtectedHeader({ alg: "HS256" })
             .setIssuedAt()
             .setExpirationTime(type === "access" ? expiration : refreshExpiration)
