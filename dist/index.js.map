@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/auth/index.ts"],
+  "sourcesContent": ["export type { AuthAdapter, User, BaseUser } from \"./adapter.js\";\r\nexport { GitHub, Google } from \"./providers.js\";\r\nexport type { Provider, ProviderConfig } from \"./providers.js\";\r\nexport { createAuth, generateSecret } from \"./core.js\";\r\nexport type { CreateAuthOptions } from \"./core.js\";\r\nexport { createMemoryAdapter } from \"./memoryAdapter.js\";\r\nexport * from \"./security.js\";\r\n"],
+  "mappings": "AACA,SAAS,QAAQ,cAAc;AAE/B,SAAS,YAAY,sBAAsB;AAE3C,SAAS,2BAA2B;AACpC,cAAc;",
+  "names": []
+}

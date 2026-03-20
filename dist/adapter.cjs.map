@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/auth/adapter.ts"],
+  "sourcesContent": ["export interface BaseUser {\r\n  id: string;\r\n  email: string;\r\n  passwordHash?: string;\r\n  role?: string;\r\n}\r\n\r\n// Allows any extended fields natively (like nin, bvn, maritalStatus, etc.)\r\nexport type User<TExtended = Record<string, any>> = BaseUser & TExtended;\r\n\r\nexport interface AuthAdapter<TUser = User> {\r\n  createUser: (data: any) => Promise<TUser>;\r\n  findUserByEmail: (email: string) => Promise<TUser | null>;\r\n  findUserById: (id: string) => Promise<TUser | null>;\r\n  linkOAuthAccount: (userId: string, provider: string, providerId: string) => Promise<void>;\r\n}\r\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

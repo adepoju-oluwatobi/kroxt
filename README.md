@@ -12,7 +12,7 @@ A framework-agnostic, modular authentication engine for modern TypeScript applic
 - 🌶️ **Password Peppering**: Server-side pepper support for enhanced hash protection.
 - 🛡️ **Timing Attack Protection**: Built-in safeguards against side-channel analysis during login.
 - ✅ **Zod Schema Support**: Perfectly preserves and types your user metadata.
-- 🚀 **ESM First**: Native support for NodeNext module resolution.
+- 🌍 **Dual ESM/CJS Support**: Native support for both modern ESM (`import`) and CommonJS (`require`).
 
 ## Installation
 
