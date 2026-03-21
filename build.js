@@ -8,6 +8,8 @@ const entryPoints = [
   'src/auth/adapters/index.ts',
   'src/auth/adapters/memory.ts',
   'src/auth/adapters/mongoose.ts',
+  'src/auth/adapters/drizzle.ts',
+  'src/auth/adapters/prisma.ts',
   'src/auth/core/index.ts',
   'src/auth/providers/index.ts',
   'src/auth/security/index.ts'
