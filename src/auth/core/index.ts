@@ -1,8 +1,8 @@
 import * as argon2 from "argon2";
 import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
-import type { AuthAdapter, User } from "./adapter.js";
-import type { Provider } from "./providers.js";
+import type { AuthAdapter, User } from "../adapters/index.js";
+import type { Provider } from "../providers/index.js";
 
 export interface CreateAuthOptions {
     adapter: AuthAdapter<any>;

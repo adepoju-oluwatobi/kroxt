@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/auth/security.ts"],
-  "sourcesContent": ["import crypto from \"crypto\";\r\n\r\n/**\r\n * Generates a stateless CSRF token using the double-submit cookie pattern.\r\n * This is recommended for Express/Kroxt setups using cookies for sessions.\r\n */\r\nexport function generateCsrfToken(): string {\r\n    return crypto.randomBytes(32).toString(\"hex\");\r\n}\r\n\r\n/**\r\n * Simple middleware-ready check for CSRF tokens.\r\n * Matches a token from the request body/headers against a cookie.\r\n */\r\nexport function verifyCsrf(tokenInRequest: string, tokenInCookie: string): boolean {\r\n    if (!tokenInRequest || !tokenInCookie) return false;\r\n\r\n    // Constant time comparison\r\n    try {\r\n        return crypto.timingSafeEqual(\r\n            Buffer.from(tokenInRequest),\r\n            Buffer.from(tokenInCookie)\r\n        );\r\n    } catch {\r\n        return false;\r\n    }\r\n}\r\n\r\n/**\r\n * Security Recommendations for Kroxt:\r\n * 1. Always set cookies with: httpOnly: true, secure: true, sameSite: 'strict'\r\n * 2. Use a 'pepper' in createAuth to protect hashes.\r\n * 3. Implement rate limiting on /login and /register endpoints.\r\n */\r\n"],
-  "mappings": "AAAA,OAAO,YAAY;AAMZ,SAAS,oBAA4B;AACxC,SAAO,OAAO,YAAY,EAAE,EAAE,SAAS,KAAK;AAChD;AAMO,SAAS,WAAW,gBAAwB,eAAgC;AAC/E,MAAI,CAAC,kBAAkB,CAAC,cAAe,QAAO;AAG9C,MAAI;AACA,WAAO,OAAO;AAAA,MACV,OAAO,KAAK,cAAc;AAAA,MAC1B,OAAO,KAAK,aAAa;AAAA,IAC7B;AAAA,EACJ,QAAQ;AACJ,WAAO;AAAA,EACX;AACJ;",
-  "names": []
-}

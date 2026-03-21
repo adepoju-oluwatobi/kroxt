@@ -8,7 +8,8 @@ A framework-agnostic, modular authentication engine for modern TypeScript applic
 - 🎟️ **Dual-Token Sessions**: Native support for Access and Refresh tokens via `jose`.
 - 🧩 **JWT Customization**: Fully extensible payload with support for custom user fields and `sub` override.
 - 🌍 **OAuth Ready**: Built-in support for GitHub and Google OAuth via `arctic`.
-- 🧩 **Database Agnostic**: Use Mongoose, Prisma, Drizzle, or any store via the `AuthAdapter` pattern.
+- 🔌 **Built-in Adapters**: Native, one-line support for **MongoDB (Mongoose)** and **In-Memory** stores.
+- 🧩 **Database Agnostic**: Use Prisma, Drizzle, or any store via the generic `AuthAdapter` pattern.
 - 🌶️ **Password Peppering**: Server-side pepper support for enhanced hash protection.
 - 🛡️ **Timing Attack Protection**: Built-in safeguards against side-channel analysis during login.
 - ✅ **Zod Schema Support**: Perfectly preserves and types your user metadata.
@@ -43,52 +44,31 @@ export interface MyUser {
 }
 ```
 
-### Step 2: The Adapter Pattern
+### Step 2: Choose an Adapter
 
-Kroxt doesn't care which database you use. You just need to implement the `AuthAdapter` interface using your model. Here is a complete example using Mongoose:
+Kroxt provides built-in adapters for popular databases. For MongoDB, simply pass your Mongoose model to `createMongoAdapter`.
 
 ```typescript
-import type { AuthAdapter } from "kroxt/adapter";
+import { createMongoAdapter } from "kroxt/adapters/mongoose";
 import { User } from "./models/user.model.js"; // Your Mongoose model
-import type { MyUser } from "./types.js";
 
-export const myAdapter: AuthAdapter<MyUser> = {
-  createUser: async (data) => {
-    const user = await User.create(data);
-    const obj = user.toObject();
-    return { ...obj, id: obj._id.toString() };
-  },
-  findUserByEmail: async (email) => {
-    const user = await User.findOne({ email });
-    if (!user) return null;
-    const obj = user.toObject();
-    return { ...obj, id: obj._id.toString() };
-  },
-  findUserById: async (id) => {
-    const user = await User.findById(id);
-    if (!user) return null;
-    const obj = user.toObject();
-    return { ...obj, id: obj._id.toString() };
-  },
-  linkOAuthAccount: async (userId, provider, providerId) => {
-    await User.findByIdAndUpdate(userId, {
-      oauthProvider: provider,
-      oauthId: providerId
-    });
-  }
-};
+// One line to connect your DB
+export const authAdapter = createMongoAdapter(User);
 ```
+
+> [!TIP]
+> Need to use Prisma, Drizzle, or a custom API? You can still build a [Custom Adapter](#custom-adapters).
 
 ### Step 3: Initialize the Auth Engine
 
 Configure Kroxt with your adapter and security settings.
 
 ```typescript
-import { createAuth } from "kroxt";
-import { myAdapter } from "./myAdapter.js";
+import { createAuth } from "kroxt/core";
+import { authAdapter } from "./auth.js";
 
 export const auth = createAuth({
-  adapter: myAdapter,
+  adapter: authAdapter,
   secret: process.env.AUTH_SECRET, // High-entropy secret for JWT signing
   pepper: process.env.AUTH_PEPPER, // Optional: Server-side pepper for password hashing
   session: {
@@ -174,6 +154,37 @@ app.get("/me", async (req, res) => {
 ```
 
 ---
+
+## Custom Adapters
+
+Kroxt's true power lies in its database-agnostic design. If you aren't using a built-in adapter, simply implement the `AuthAdapter` interface.
+
+```typescript
+import type { AuthAdapter, User } from "kroxt/adapters";
+import { db } from "./db.js";
+
+// Example using a generic DB client
+export const myCustomAdapter: AuthAdapter<MyUser> = {
+  createUser: async (data) => {
+    const user = await db.users.insert(data);
+    return { ...user, id: user.id.toString() };
+  },
+  findUserByEmail: async (email) => {
+    return await db.users.findFirst({ where: { email } });
+  },
+  findUserById: async (id) => {
+    return await db.users.findUnique({ where: { id } });
+  },
+  linkOAuthAccount: async (id, provider, providerId) => {
+    await db.users.update({
+      where: { id },
+      data: { oauthProvider: provider, oauthId: providerId }
+    });
+  }
+};
+```
+
+Using this pattern, you can connect Kroxt to **Supabase**, **Firestore**, **PostgreSQL**, or even a 3rd-party API.
 
 ## Security Best Practices
 
