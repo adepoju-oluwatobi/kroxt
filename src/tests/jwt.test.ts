@@ -1,5 +1,5 @@
-import { createAuth } from "./auth/core.js";
-import { createMemoryAdapter } from "./auth/memoryAdapter.js";
+import { createAuth } from "../auth/core/index.js";
+import { createMemoryAdapter } from "../auth/adapters/memory.js";
 
 async function verify() {
     console.log("Starting JWT Payload Customization Verification...");

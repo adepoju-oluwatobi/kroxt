@@ -31,24 +31,34 @@
       "require": "./dist/index.cjs"
     },
     "./adapter": {
-      "types": "./dist/adapter.d.ts",
-      "import": "./dist/adapter.js",
-      "require": "./dist/adapter.cjs"
+      "types": "./dist/adapters/index.d.ts",
+      "import": "./dist/adapters/index.js",
+      "require": "./dist/adapters/index.cjs"
     },
     "./core": {
-      "types": "./dist/core.d.ts",
-      "import": "./dist/core.js",
-      "require": "./dist/core.cjs"
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.cjs"
     },
     "./providers": {
-      "types": "./dist/providers.d.ts",
-      "import": "./dist/providers.js",
-      "require": "./dist/providers.cjs"
+      "types": "./dist/providers/index.d.ts",
+      "import": "./dist/providers/index.js",
+      "require": "./dist/providers/index.cjs"
     },
-    "./memoryAdapter": {
-      "types": "./dist/memoryAdapter.d.ts",
-      "import": "./dist/memoryAdapter.js",
-      "require": "./dist/memoryAdapter.cjs"
+    "./adapters/memory": {
+      "types": "./dist/adapters/memory.d.ts",
+      "import": "./dist/adapters/memory.js",
+      "require": "./dist/adapters/memory.cjs"
+    },
+    "./adapters/mongoose": {
+      "types": "./dist/adapters/mongoose.d.ts",
+      "import": "./dist/adapters/mongoose.js",
+      "require": "./dist/adapters/mongoose.cjs"
+    },
+    "./security": {
+      "types": "./dist/security/index.d.ts",
+      "import": "./dist/security/index.js",
+      "require": "./dist/security/index.cjs"
     }
   },
   "files": [

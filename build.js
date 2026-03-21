@@ -5,11 +5,12 @@ import path from 'path';
 
 const entryPoints = [
   'src/auth/index.ts',
-  'src/auth/adapter.ts',
-  'src/auth/core.ts',
-  'src/auth/providers.ts',
-  'src/auth/memoryAdapter.ts',
-  'src/auth/security.ts'
+  'src/auth/adapters/index.ts',
+  'src/auth/adapters/memory.ts',
+  'src/auth/adapters/mongoose.ts',
+  'src/auth/core/index.ts',
+  'src/auth/providers/index.ts',
+  'src/auth/security/index.ts'
 ];
 
 async function run() {
