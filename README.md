@@ -1,221 +1,177 @@
-# kroxt
+# kroxt 🔐
 
-A framework-agnostic, modular authentication engine for modern TypeScript applications. Built for security, extensibility, and ease of use.
+A framework-agnostic, modular authentication engine for modern TypeScript applications. Built for security, extensibility, and pure developer joy.
 
-## Features
+[![npm version](https://img.shields.io/npm/v/kroxt.svg)](https://www.npmjs.com/package/kroxt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- 🔐 **Secure Hashing**: Powered by `argon2` for industry-standard password security.
-- 🎟️ **Dual-Token Sessions**: Native support for Access and Refresh tokens via `jose`.
-- 🧩 **JWT Customization**: Fully extensible payload with support for custom user fields and `sub` override.
-- 🌍 **OAuth Ready**: Built-in support for GitHub and Google OAuth via `arctic`.
-- 🔌 **Built-in Adapters**: Native, one-line support for **MongoDB (Mongoose)** and **In-Memory** stores.
-- 🧩 **Database Agnostic**: Use Prisma, Drizzle, or any store via the generic `AuthAdapter` pattern.
-- 🌶️ **Password Peppering**: Server-side pepper support for enhanced hash protection.
-- 🛡️ **Timing Attack Protection**: Built-in safeguards against side-channel analysis during login.
-- ✅ **Zod Schema Support**: Perfectly preserves and types your user metadata.
-- 🌍 **Dual ESM/CJS Support**: Native support for both modern ESM (`import`) and CommonJS (`require`).
+## 🚀 Why Kroxt?
 
-## Installation
+Authentication is often either too complex (Passport, Auth.js) or too restrictive. Kroxt is the **"Headless" Auth Engine** that gives you the best of both worlds:
+
+- 🏗️ **Database Agnostic**: Native adapters for **Prisma**, **Drizzle**, and **Mongoose**.
+- 🛠️ **Modular**: Use only what you need. No forced session managers or UI components.
+- 🔐 **Security First**: Argon2 hashing, dual-token rotation, and timing-attack protection built-in.
+- 🧩 **TypeScript Native**: Perfectly preserves your user schemas and metadata.
+
+---
+
+## 🗺️ How it Works
+
+Kroxt sits between your database and your controller logic. It handles the "heavy lifting" (hashing, JWT signing, token rotation) while you maintain full control over your API.
+
+```mermaid
+graph LR
+    A[Client] -- "Credentials" --> B[Express/Fastify]
+    B -- "auth.signup()" --> C[Kroxt Engine]
+    C -- "Save User" --> D[(Database Adapter)]
+    D -- "Success" --> C
+    C -- "Tokens + User" --> B
+    B -- "Set Cookies/JSON" --> A
+    
+    subgraph Adapters
+    D
+    E[Mongoose]
+    F[Drizzle]
+    G[Prisma]
+    end
+```
+
+---
+
+## 🏁 Quick Start (5 Minutes)
+
+### 1. Installation
 
 ```bash
 npm install kroxt
 ```
 
----
+### 2. Choose Your Adapter
 
-## Guide: Full Authentication Flow
+Kroxt provides official adapters for the most popular ORMs.
 
-This guide walks you through setting up Kroxt from scratch in your application.
-
-### Step 1: Define your User
-
-First, define what a User looks like in your system. Kroxt allows any additional fields (like `role`, `schoolId`, etc.) which you can later sign into your JWTs.
-
+#### **Option A: Drizzle (SQLite/PG/MySQL)**
 ```typescript
-export interface MyUser {
-  id: string;
-  email: string;
-  passwordHash: string;
-  role: 'admin' | 'user';
-  schoolId: string;    // Custom field for enterprise/multi-tenant apps
-  oauthProvider?: string; // Support for OAuth (e.g., 'github')
-  oauthId?: string;       // Unique ID from the provider
-  name: string;
-}
+import { createDrizzleAdapter } from "kroxt/adapters/drizzle";
+import { db } from "./db";
+import { users } from "./schema";
+import { eq } from "drizzle-orm";
+
+export const adapter = createDrizzleAdapter(db, users, eq);
 ```
 
-### Step 2: Choose an Adapter
+#### **Option B: Prisma**
+```typescript
+import { createPrismaAdapter } from "kroxt/adapters/prisma";
+import { prisma } from "./db";
 
-Kroxt provides built-in adapters for popular databases. For MongoDB, simply pass your Mongoose model to `createMongoAdapter`.
+export const adapter = createPrismaAdapter(prisma.user);
+```
 
+#### **Option C: Mongoose**
 ```typescript
 import { createMongoAdapter } from "kroxt/adapters/mongoose";
-import { User } from "./models/user.model.js"; // Your Mongoose model
+import { User } from "./models/user.model";
 
-// One line to connect your DB
-export const authAdapter = createMongoAdapter(User);
+export const adapter = createMongoAdapter(User);
 ```
 
-> [!TIP]
-> Need to use Prisma, Drizzle, or a custom API? You can still build a [Custom Adapter](#custom-adapters).
-
-### Step 3: Initialize the Auth Engine
-
-Configure Kroxt with your adapter and security settings.
+### 3. Initialize the Engine
 
 ```typescript
 import { createAuth } from "kroxt/core";
-import { authAdapter } from "./auth.js";
+import { adapter } from "./auth-adapter";
 
 export const auth = createAuth({
-  adapter: authAdapter,
-  secret: process.env.AUTH_SECRET, // High-entropy secret for JWT signing
-  pepper: process.env.AUTH_PEPPER, // Optional: Server-side pepper for password hashing
+  adapter,
+  secret: process.env.JWT_SECRET,
   session: {
-    expires: "15m",        // Access token duration
-    refreshExpires: "7d"   // Refresh token duration
-  },
+    expires: "15m",
+    refreshExpires: "7d"
+  }
+});
+```
+
+---
+
+## 🛡️ Core Authentication Flows
+
+### **Registration**
+```typescript
+const { user, accessToken, refreshToken } = await auth.signup({ 
+  email, 
+  name, 
+  role: 'user' 
+}, password);
+```
+
+### **Login**
+```typescript
+const { user, accessToken, refreshToken } = await auth.loginWithPassword(email, password);
+```
+
+### **Token Refresh**
+```typescript
+const { accessToken } = await auth.refresh(refreshToken);
+```
+
+---
+
+## 🐣 Beginner Corner: What is "Headless"?
+
+If you're new to backend development, "Headless" means Kroxt **doesn't provide a UI** (no login buttons or pre-made forms). Instead, it provides the **engine** (the logic). 
+
+**Why is this good?**
+It means you can build your own login screen in React, Vue, or even a Mobile App, and Kroxt will handle the security part on the server exactly the same way every time.
+
+---
+
+## 🛠️ Advanced: Custom JWT Payloads
+
+Want to share a user's `role` or `plan` with the frontend via the JWT? Use the `payload` hook:
+
+```typescript
+export const auth = createAuth({
+  adapter,
   jwt: {
-    /**
-     * Optional: Fully customize the JWT payload or add extra fields.
-     */
     payload: (user, type) => {
-      // Only add extra details to 'access' tokens to keep 'refresh' tokens light.
       if (type === "access") {
-        return {
-          schoolId: user.schoolId, // Add custom user detail
-          role: user.role,         // Explicitly include role
+        return { 
+          role: user.role, 
+          tier: user.subscriptionTier 
         };
       }
-      return {}; // Refresh tokens stay minimal
+      return {}; // Keep refresh tokens small
     }
   }
 });
 ```
 
-### Step 4: Implement Controllers & Routes
+---
 
-Use the engine in your application logic. Examples below use an Express-like structure.
+## 🛑 Common v1.2.0 Troubleshooting
 
-#### Registration
+### "Cannot find module '.prisma/client/default.js'" (ESM on Windows)
+If you're using Prisma with ESM (`"type": "module"`) on Windows, you may need a robust import in your `src/db/index.ts`:
+
 ```typescript
-app.post("/register", async (req, res) => {
-  const { name, email, password, ...extraFields } = req.body;
-  
-  // Kroxt handles argon2 hashing (with pepper) and token generation
-  const { user, accessToken, refreshToken } = await auth.signup({
-    name,
-    email,
-    ...extraFields
-  }, password);
-
-  res.json({ user, accessToken, refreshToken });
-});
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require("@prisma/client");
 ```
 
-#### Login
-```typescript
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  
-  // Kroxt verifies password (timing-attack safe) and returns tokens
-  const { user, accessToken, refreshToken } = await auth.loginWithPassword(email, password);
-
-  res.json({ user, accessToken, refreshToken });
-});
-```
-
-#### Token Refresh
-Keep users logged in by rotating access tokens using a valid refresh token.
-```typescript
-app.post("/refresh", async (req, res) => {
-  const { refreshToken } = req.body;
-  
-  // Returns a fresh access token
-  const { accessToken } = await auth.refresh(refreshToken);
-  
-  res.json({ accessToken });
-});
-```
-
-#### Protecting Routes (Middleware)
-```typescript
-app.get("/me", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  
-  // Verify the JWT and get the payload { sub: string, role: string, ... }
-  const payload = await auth.verifyToken(token, "access");
-  
-  if (!payload) return res.status(401).send("Unauthorized");
-  
-  const user = await myAdapter.findUserById(payload.sub);
-  res.json(user);
-});
-```
+### Prisma "Unknown argument `name`"
+Prisma is strict about schemas. If you're sending extra fields in `auth.signup()`, ensure your `schema.prisma` includes them (marked as `?` optional if needed).
 
 ---
 
-## Custom Adapters
+## 🔗 Reference Project
 
-Kroxt's true power lies in its database-agnostic design. If you aren't using a built-in adapter, simply implement the `AuthAdapter` interface.
+Complete working implementations:
+- [Express + Drizzle + SQLite](https://github.com/adepoju-oluwatobi/kroxt-example)
+- [Express + Mongoose](https://github.com/adepoju-oluwatobi/kroxt-example-cjs)
 
-```typescript
-import type { AuthAdapter, User } from "kroxt/adapters";
-import { db } from "./db.js";
+## 📄 License
 
-// Example using a generic DB client
-export const myCustomAdapter: AuthAdapter<MyUser> = {
-  createUser: async (data) => {
-    const user = await db.users.insert(data);
-    return { ...user, id: user.id.toString() };
-  },
-  findUserByEmail: async (email) => {
-    return await db.users.findFirst({ where: { email } });
-  },
-  findUserById: async (id) => {
-    return await db.users.findUnique({ where: { id } });
-  },
-  linkOAuthAccount: async (id, provider, providerId) => {
-    await db.users.update({
-      where: { id },
-      data: { oauthProvider: provider, oauthId: providerId }
-    });
-  }
-};
-```
-
-Using this pattern, you can connect Kroxt to **Supabase**, **Firestore**, **PostgreSQL**, or even a 3rd-party API.
-
-## Security Best Practices
-
-### 1. Password Peppering
-Always use a `pepper` in production. It's a server-side secret added to passwords before hashing. If your database is leaked, the hashes cannot be cracked without this pepper.
-
-### 2. CSRF Protection
-Kroxt provides helpers for the double-submit cookie pattern. Use these if you are storing tokens in cookies.
-
-```typescript
-import { generateCsrfToken, verifyCsrf } from "kroxt/security";
-
-const token = generateCsrfToken();
-const isValid = verifyCsrf(tokenInRequest, tokenInCookie);
-```
-
-### 3. Secure Cookies
-If using cookies, always set these flags:
-- `httpOnly: true` (Prevents XSS)
-- `secure: true` (Requires HTTPS)
-- `sameSite: 'strict'` (Prevents CSRF)
-
-### 4. Rate Limiting
-Implement rate limiting (e.g., `express-rate-limit`) on `/login` and `/register` to block brute-force attempts.
-
----
-
-## Reference Project
-
-Check out the `kroxt-example` folder or the [GitHub repository](https://github.com/adepoju-oluwatobi/kroxt-example) for a complete **Express + MongoDB** implementation using this library.
-
-## License
-
-MIT
+MIT © [Adepoju Oluwatobi](https://github.com/adepoju-oluwatobi)

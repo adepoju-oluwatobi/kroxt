@@ -1,6 +1,6 @@
 {
   "name": "kroxt",
-  "version": "1.1.5",
+  "version": "1.2.0",
   "keywords": [
     "auth",
     "authentication",
@@ -16,6 +16,7 @@
     "hono",
     "express",
     "prisma-adapter",
+    "drizzle-adapter",
     "mongoose-adapter"
   ],
   "license": "MIT",
@@ -54,6 +55,16 @@
       "types": "./dist/adapters/mongoose.d.ts",
       "import": "./dist/adapters/mongoose.js",
       "require": "./dist/adapters/mongoose.cjs"
+    },
+    "./adapters/drizzle": {
+      "types": "./dist/adapters/drizzle.d.ts",
+      "import": "./dist/adapters/drizzle.js",
+      "require": "./dist/adapters/drizzle.cjs"
+    },
+    "./adapters/prisma": {
+      "types": "./dist/adapters/prisma.d.ts",
+      "import": "./dist/adapters/prisma.js",
+      "require": "./dist/adapters/prisma.cjs"
     },
     "./security": {
       "types": "./dist/security/index.d.ts",
