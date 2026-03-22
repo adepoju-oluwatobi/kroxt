@@ -16,7 +16,7 @@ We currently provide security updates for the following versions:
 If you discover a potential security vulnerability in Kroxt, please report it via one of the following methods:
 
 1.  **GitHub Security Advisory**: Open a draft advisory in the [Kroxt repository](https://github.com/adepoju-oluwatobi/kroxt/security/advisories/new).
-2.  **Email**: Send a detailed report to **security@kroxt.dev** (or the project maintainer directly).
+2.  **Email**: Send a detailed report to **kunletobi4@gmail.com** (or the project maintainer directly).
 
 ### What to include in your report:
 

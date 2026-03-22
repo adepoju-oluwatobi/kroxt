@@ -7,7 +7,7 @@ A framework-agnostic, modular authentication engine for modern TypeScript applic
 [![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](./SECURITY.md)
 
 > [!IMPORTANT]
-> **What's New in v1.2.0**: Universal SQL support (Drizzle/Prisma), multi-framework examples for Express/Fastify/Hono, and a revamped mobile-first documentation site. [Read the full Changelog](./CHANGELOG.md).
+> **What's New in v1.2.2**: Hardened CSRF protection (Regex + Hex comparisons), official Security Policy (`SECURITY.md`), standalone security examples, and full TypeScript support for all framework samples. [Read the full Changelog](./CHANGELOG.md).
 
 ## 🚀 Why Kroxt?
 

@@ -2,6 +2,16 @@
 
 All notable changes to the Kroxt project will be documented in this file.
 
+## [1.2.2] - 2026-03-22
+
+### Added
+- **Security Policy**: Added `SECURITY.md` and official vulnerability reporting guidelines.
+- **CSRF Example**: New standalone security example demonstrating Double-Submit Cookie protection.
+
+### Fixed
+- **Security (Critical)**: Hardened `verifyCsrf` with strict regex validation (`/^[a-f0-9]{64}$/i`) and hex-aware buffer comparisons to eliminate timing attacks and length-guessing vulnerabilities.
+- **TypeScript (Examples)**: Resolved "Cannot find module 'kroxt'" and "implicit any" errors across all Express examples.
+
 ## [1.2.0] - 2026-03-22
 
 ### Added

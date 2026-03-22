@@ -15,15 +15,18 @@ export function generateCsrfToken(): string {
 export function verifyCsrf(tokenInRequest: string, tokenInCookie: string): boolean {
     if (!tokenInRequest || !tokenInCookie) return false;
 
-    // Constant time comparison
-    try {
-        return crypto.timingSafeEqual(
-            Buffer.from(tokenInRequest),
-            Buffer.from(tokenInCookie)
-        );
-    } catch {
-        return false;
-    }
+    const isValid =
+        /^[a-f0-9]{64}$/i.test(tokenInRequest) &&
+        /^[a-f0-9]{64}$/i.test(tokenInCookie);
+
+    if (!isValid) return false;
+
+    const bufA = Buffer.from(tokenInRequest, "hex");
+    const bufB = Buffer.from(tokenInCookie, "hex");
+
+    if (bufA.length !== bufB.length) return false;
+
+    return crypto.timingSafeEqual(bufA, bufB);
 }
 
 /**
