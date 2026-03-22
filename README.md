@@ -4,6 +4,10 @@ A framework-agnostic, modular authentication engine for modern TypeScript applic
 
 [![npm version](https://img.shields.io/npm/v/kroxt.svg)](https://www.npmjs.com/package/kroxt)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-brightgreen.svg)](./SECURITY.md)
+
+> [!IMPORTANT]
+> **What's New in v1.2.0**: Universal SQL support (Drizzle/Prisma), multi-framework examples for Express/Fastify/Hono, and a revamped mobile-first documentation site. [Read the full Changelog](./CHANGELOG.md).
 
 ## 🚀 Why Kroxt?
 
@@ -166,11 +170,13 @@ Prisma is strict about schemas. If you're sending extra fields in `auth.signup()
 
 ---
 
-## 🔗 Reference Project
+## 🔗 Reference Projects
 
-Complete working implementations:
-- [Express + Drizzle + SQLite](https://github.com/adepoju-oluwatobi/kroxt-example)
-- [Express + Mongoose](https://github.com/adepoju-oluwatobi/kroxt-example-cjs)
+Complete working implementations for all frameworks:
+- [Kroxt Examples (All Frameworks)](https://github.com/adepoju-oluwatobi/kroxt-examples)
+- [Hono + Drizzle + SQLite](https://github.com/adepoju-oluwatobi/kroxt-examples/tree/main/hono/kroxt-hono-drizzle)
+- [Express + Prisma + DB](https://github.com/adepoju-oluwatobi/kroxt-examples/tree/main/express/kroxt-express-prisma)
+- [Fastify + Mongoose](https://github.com/adepoju-oluwatobi/kroxt-examples/tree/main/fastify/kroxt-fastify-mongo)
 
 ## 📄 License
 
