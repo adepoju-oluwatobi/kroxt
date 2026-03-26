@@ -1,39 +1,34 @@
 # Changelog
 
-All notable changes to the Kroxt project will be documented in this file.
+All notable changes to the **Kroxt** authentication engine will be documented in this file.
+
+## [1.3.0] - 2026-03-26
+
+### ✨ Added
+- **Kroxt CLI (`npx kroxt init`)**: A powerful, interactive command-line tool to bootstrap your `auth.ts` configuration, set up `.env` secrets, and generate `tsconfig.json` automatically.
+- **Granular Security Toggles**: CLI now prompts for Rate Limiting, IP Blocking, Strict Session Revocation, and Password Peppering.
+- **Password Peppering**: Added support for server-side peppering to further harden password hashes.
+- **Integrated Rate Limiting**: New models and logic for brute-force defense and IP-based blocking.
+- **Monochrome Design System**: A complete visual overhaul of the landing page and documentation to a high-contrast, premium "Obsidian" aesthetic.
+
+### ⚙️ Changed
+- **Hybrid Import Style**: Optimized imports to use `kroxt` for core logic and `kroxt/adapters/*` for specific database adapters.
+- **Root Exports**: Consolidated adapter factory functions into the root package for easier discovery.
+- **Module Resolution**: Updated CLI-generated `tsconfig.json` to use `moduleResolution: "bundler"` for better compatibility with modern ESM projects.
+
+### 🛡️ Security
+- **IP Blocking Layer**: Automatically Ban IPs after a configurable number of failed attempts.
+- **Real-time Revocation**: Enhanced token validation fragmenting for instant session killing upon password change.
+
+---
 
 ## [1.2.2] - 2026-03-22
+### ✨ Added
+- Hardened CSRF protection with Regex + Hex comparison.
+- Official Security Policy (`SECURITY.md`).
+- Multi-framework examples (Express, Fastify, Hono).
 
-### Added
-- **Security Policy**: Added `SECURITY.md` and official vulnerability reporting guidelines.
-- **CSRF Example**: New standalone security example demonstrating Double-Submit Cookie protection.
-
-### Fixed
-- **Security (Critical)**: Hardened `verifyCsrf` with strict regex validation (`/^[a-f0-9]{64}$/i`) and hex-aware buffer comparisons to eliminate timing attacks and length-guessing vulnerabilities.
-- **TypeScript (Examples)**: Resolved "Cannot find module 'kroxt'" and "implicit any" errors across all Express examples.
-
-## [1.2.0] - 2026-03-22
-
-### Added
-- **Universal SQL Support**: Official adapters for **Drizzle** and **Prisma**.
-- **Multi-Framework Ecosystem**: Standardized implementation patterns for **Express**, **Fastify**, and **Hono**.
-- **Documentation Overhaul**: Modernized the technical documentation with framework-agnostic guides.
-- **Mobile Navigation**: Added sidebar overlays and backdrop blur effects for a premium mobile experience.
-- **Unified Examples**: Created a centralized repository (`kroxt-examples`) for all framework-adapter combinations.
-
-### Fixed
-- **TypeScript Resolution**: Corrected `kroxt` module resolution issues in local development environments.
-- **Mobile Layout**: Fixed sidebar stacking order (`z-index`) and horizontal page overflow on small screens.
-- **Prisma ESM Support**: Added workaround instructions for Prisma client imports in ESM-based Windows environments.
-
-## [1.1.5] - 2026-03-10
-### Added
-- Initial support for Mongoose adapter.
-- JWT token rotation logic.
-- Basic documentation site.
-
-## [1.0.0] - 2026-03-05
-### Added
-- Core authentication engine.
-- Argon2 password hashing.
-- Token rotation security.
+## [1.2.1] - 2026-03-15
+### ✨ Added
+- Initial support for Prisma and Drizzle adapters.
+- Basic Argon2 implementation.

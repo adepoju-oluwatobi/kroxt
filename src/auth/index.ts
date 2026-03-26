@@ -4,5 +4,7 @@ export type { Provider, ProviderConfig } from "./providers/index.js";
 export { createAuth, generateSecret } from "./core/index.js";
 export type { CreateAuthOptions } from "./core/index.js";
 export { createMemoryAdapter } from "./adapters/memory.js";
-export { createMongoAdapter } from "./adapters/mongoose.js";
+export { createMongoAdapter, createRateLimitModel } from "./adapters/mongoose.js";
+export { createPrismaAdapter } from "./adapters/prisma.js";
+export { createDrizzleAdapter } from "./adapters/drizzle.js";
 export * from "./security/index.js";

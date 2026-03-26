@@ -13,7 +13,9 @@ const entryPoints = [
   'src/auth/core/index.ts',
   'src/auth/providers/index.ts',
   'src/auth/security/index.ts',
-  'src/auth/security/rate-limit.ts'
+  'src/auth/security/rate-limit.ts',
+  'src/cli/index.ts',
+  'src/cli/templates.ts'
 ];
 
 async function run() {
