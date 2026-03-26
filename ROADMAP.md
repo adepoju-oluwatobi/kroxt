@@ -4,9 +4,9 @@ While Kroxt is already secure and modular, the following roadmap focuses on beco
 
 ## 🛡️ Priority 1: Advanced Security & Hardening
 Security is the heartbeat of Kroxt. We're doubling down on pro-active defense.
-- [ ] **Automatic Rate Limiting**: Built-in, intelligent protection against brute-force and credential stuffing.
-- [ ] **Automatic IP Blocking**: Proactive defense system to detect and throttle malicious patterns.
-- [ ] **Session Revocation**: Real-time invalidation of all sessions for a specific user (critical for compromised accounts).
+- [x] **Automatic Rate Limiting**: Built-in, intelligent protection against brute-force and credential stuffing.
+- [x] **Automatic IP Blocking**: Proactive defense system to detect and throttle malicious patterns.
+- [x] **Session Revocation**: Real-time invalidation of all sessions for a specific user (critical for compromised accounts).
 - [ ] **Passkeys (WebAuthn)**: Native support for biometric login (FaceID, TouchID, Yubikeys).
 - [ ] **Social Auth (OAuth2 / OIDC)**: Official providers for GitHub, Google, and Apple.
 - [ ] **Multi-Factor Auth (MFA)**: Built-in engine for TOTP and encrypted backup codes.
