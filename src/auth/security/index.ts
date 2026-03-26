@@ -35,3 +35,5 @@ export function verifyCsrf(tokenInRequest: string, tokenInCookie: string): boole
  * 2. Use a 'pepper' in createAuth to protect hashes.
  * 3. Implement rate limiting on /login and /register endpoints.
  */
+
+export * from "./rate-limit.js";

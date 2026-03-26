@@ -1,0 +1,28 @@
+﻿Starting Automatic IP Blocking Test...
+Creating test user...
+
+Simulating Strike 1 (2 successful, then 1 blocked)...
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+Strike Record: null
+Waiting 0.6 seconds for rate limit window to reset...
+
+Simulating Strike 2...
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+DEBUG strikeCheck state: null clientIp: 192.168.1.100
+Logged strike 2 correctly
+Strike Record: { count: 1, resetTime: 1774421444176 }
+Waiting 0.6 seconds for rate limit window to reset...
+
+Simulating Strike 3...
+DEBUG strikeCheck state: { count: 1, resetTime: 1774421444176 } clientIp: 192.168.1.100
+DEBUG strikeCheck state: { count: 1, resetTime: 1774421444176 } clientIp: 192.168.1.100
+DEBUG strikeCheck state: { count: 1, resetTime: 1774421444176 } clientIp: 192.168.1.100
+Logged strike 3 correctly
+Strike Record: { count: 2, resetTime: 1774421444176 }
+
+Testing if IP is now completely blocked...
+Current Strike Record before testing block: { count: 2, resetTime: 1774421444176 }
+DEBUG strikeCheck state: { count: 2, resetTime: 1774421444176 } clientIp: 192.168.1.100

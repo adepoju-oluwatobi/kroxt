@@ -3,6 +3,7 @@ import { SignJWT, jwtVerify } from "jose";
 import crypto from "crypto";
 import type { AuthAdapter, User } from "../adapters/index.js";
 import type { Provider } from "../providers/index.js";
+import { createRateLimiter, type RateLimitOptions } from "../security/rate-limit.js";
 
 export interface CreateAuthOptions {
     adapter: AuthAdapter<any>;
@@ -11,6 +12,7 @@ export interface CreateAuthOptions {
     session?: {
         expires?: string | number; // For access tokens
         refreshExpires?: string | number; // For refresh tokens
+        enforceStrictRevocation?: boolean; // If true, DB check on access tokens
     };
     providers?: Provider[];
     jwt?: {
@@ -22,19 +24,35 @@ export interface CreateAuthOptions {
          */
         payload?: (user: User<any>, type: "access" | "refresh") => Record<string, any>;
     };
+    rateLimit?: RateLimitOptions;
+    ipBlocking?: { maxStrikes: number; blockDurationMs: number };
+    passwordPolicy?: {
+        minLength?: number;
+        requireUppercase?: boolean;
+        requireLowercase?: boolean;
+        requireNumber?: boolean;
+        requireSpecialCharacter?: boolean;
+    };
 }
 
 export function createAuth(options: CreateAuthOptions) {
-    const { adapter, secret, pepper, session, providers } = options;
+    const { adapter, secret, pepper, session, providers, rateLimit, ipBlocking } = options;
     const encodedSecret = typeof secret === "string" ? new TextEncoder().encode(secret) : secret;
     const expiration = session?.expires || "1h"; // Default access token to 1h
     const refreshExpiration = session?.refreshExpires || "7d";
+
+    const configuredRateLimiter = createRateLimiter(adapter, rateLimit);
 
     /**
      * Generates a stateless JWT for a user session
      */
     async function generateToken(user: User<any>, type: "access" | "refresh" = "access") {
         let payload: Record<string, any> = { sub: user.id, role: user.role, type };
+
+        // Lightweight Session Revocation: Link token to current password hash state
+        if (user.passwordHash && (type === "refresh" || session?.enforceStrictRevocation)) {
+            payload.pw_frag = user.passwordHash.slice(-10);
+        }
 
         if (options.jwt?.payload) {
             const customPayload = options.jwt.payload(user, type);
@@ -56,6 +74,14 @@ export function createAuth(options: CreateAuthOptions) {
         try {
             const { payload } = await jwtVerify(token, encodedSecret);
             if (payload.type !== expectedType) return null;
+
+            if (expectedType === "access" && session?.enforceStrictRevocation && payload.pw_frag) {
+                const user = await adapter.findUserById(payload.sub as string);
+                if (!user || payload.pw_frag !== user.passwordHash?.slice(-10)) {
+                    throw new Error("Strict Revocation: Access Token revoked due to password change");
+                }
+            }
+
             return payload;
         } catch (e) {
             return null;
@@ -76,8 +102,36 @@ export function createAuth(options: CreateAuthOptions) {
             throw new Error("User not found");
         }
 
+        // Lightweight Session Revocation: Validate password hasn't changed since token issuance
+        if (payload.pw_frag && user.passwordHash) {
+            if (payload.pw_frag !== user.passwordHash.slice(-10)) {
+                throw new Error("Session revoked (Password changed)");
+            }
+        }
+
         const accessToken = await generateToken(user, "access");
         return { accessToken };
+    }
+
+    function validatePassword(password?: string) {
+        if (!password || !options.passwordPolicy) return;
+        
+        const p = options.passwordPolicy;
+        if (p.minLength && password.length < p.minLength) {
+            throw new Error(`Password must be at least ${p.minLength} characters`);
+        }
+        if (p.requireUppercase && !/[A-Z]/.test(password)) {
+            throw new Error("Password must contain at least one uppercase letter");
+        }
+        if (p.requireLowercase && !/[a-z]/.test(password)) {
+            throw new Error("Password must contain at least one lowercase letter");
+        }
+        if (p.requireNumber && !/[0-9]/.test(password)) {
+            throw new Error("Password must contain at least one number");
+        }
+        if (p.requireSpecialCharacter && !/[^A-Za-z0-9]/.test(password)) {
+            throw new Error("Password must contain at least one special character");
+        }
     }
 
     /**
@@ -88,6 +142,7 @@ export function createAuth(options: CreateAuthOptions) {
         let dataToSave = { ...userData };
 
         if (password) {
+            validatePassword(password);
             const passwordWithPepper = pepper ? `${password}${pepper}` : password;
             dataToSave.passwordHash = await argon2.hash(passwordWithPepper);
         }
@@ -103,7 +158,24 @@ export function createAuth(options: CreateAuthOptions) {
      * Standard Email/Password Login.
      * Includes timing attack protection and password peppering.
      */
-    async function loginWithPassword(email: string, password: string) {
+    async function loginWithPassword(email: string, password: string, clientIp?: string) {
+        if (ipBlocking && clientIp && configuredRateLimiter) {
+            const strikeCheck = await configuredRateLimiter.check(`strike_${clientIp}`);
+            if (strikeCheck && strikeCheck.count >= ipBlocking.maxStrikes) {
+                throw new Error("IP is temporarily blocked.");
+            }
+        }
+
+        if (configuredRateLimiter) {
+            const limitStatus = await configuredRateLimiter.increment(`login_${email}`);
+            if (!limitStatus.success) {
+                if (ipBlocking && clientIp) {
+                    await configuredRateLimiter.increment(`strike_${clientIp}`, ipBlocking.blockDurationMs);
+                }
+                throw new Error("Too many requests, please try again later.");
+            }
+        }
+
         const user = await adapter.findUserByEmail(email);
 
         // Timing attack protection: Always verify a hash, even if user doesn't exist.
@@ -124,9 +196,31 @@ export function createAuth(options: CreateAuthOptions) {
         return { user, accessToken, refreshToken };
     }
 
+    /**
+     * Changes a user's password securely using the configured pepper and hashing algorithm.
+     * Instantly revokes all active refresh tokens for the user globally.
+     */
+    async function changePassword(userId: string, newPassword: string) {
+        if (!adapter.updateUser) {
+            throw new Error("The AuthAdapter does not support updating user records natively.");
+        }
+
+        validatePassword(newPassword);
+        const passwordWithPepper = pepper ? `${newPassword}${pepper}` : newPassword;
+        const newHash = await argon2.hash(passwordWithPepper);
+
+        const updatedUser = await adapter.updateUser(userId, { passwordHash: newHash } as any);
+        if (!updatedUser) {
+            throw new Error("User not found");
+        }
+        
+        return updatedUser;
+    }
+
     return {
         signup,
         loginWithPassword,
+        changePassword,
         refresh,
         verifyToken,
         generateToken,

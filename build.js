@@ -12,7 +12,8 @@ const entryPoints = [
   'src/auth/adapters/prisma.ts',
   'src/auth/core/index.ts',
   'src/auth/providers/index.ts',
-  'src/auth/security/index.ts'
+  'src/auth/security/index.ts',
+  'src/auth/security/rate-limit.ts'
 ];
 
 async function run() {
