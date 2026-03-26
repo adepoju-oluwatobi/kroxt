@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import Enquirer from 'enquirer';
+import { prompt } from 'enquirer';
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
@@ -9,12 +9,11 @@ import { spawn } from 'child_process';
 import { authTemplate, envTemplate, tsConfigTemplate } from './templates.js';
 
 const program = new Command();
-const enquirer = new Enquirer();
 
 program
   .name('kroxt')
   .description('Kroxt CLI for bootstrapping auth engines')
-  .version('1.0.0');
+  .version('1.3.1');
 
 program
   .command('init')
@@ -39,7 +38,7 @@ program
       const defaultDir = projectContext.isExpress ? (projectContext.hasSrc ? 'src/config' : 'config') : (projectContext.hasSrc ? 'src/lib/kroxt' : 'lib/kroxt');
 
       if (!options.yes) {
-        response = await enquirer.prompt([
+        response = await prompt([
           {
             type: 'select',
             name: 'adapter',
@@ -203,8 +202,7 @@ async function checkAndInstallDeps(adapter: string, skipPrompts: boolean = false
     let confirm = true;
 
     if (!skipPrompts) {
-      const enquirer = new Enquirer();
-      const result = await enquirer.prompt({
+      const result = await prompt({
         type: 'confirm',
         name: 'confirm',
         message: `Required dependencies are missing: ${chalk.cyan(missing.join(', '))}. Install them now?`,
