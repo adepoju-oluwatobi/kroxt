@@ -2,10 +2,10 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src/auth",
+    "rootDir": "src",
     "declaration": true,
     "emitDeclarationOnly": true
   },
-  "include": ["src/auth/**/*"],
-  "exclude": ["node_modules", "dist", "test-project", "src/test.ts", "src/verify_jwt.ts"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "tester", "tester2", "src/tests"]
 }

@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const entryPoints = [
+  'src/index.ts',
   'src/auth/index.ts',
   'src/auth/adapters/index.ts',
   'src/auth/adapters/memory.ts',

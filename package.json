@@ -1,6 +1,6 @@
 {
   "name": "kroxt",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "bin": {
     "kroxt": "./dist/cli/index.js"
   },
@@ -35,44 +35,44 @@
       "require": "./dist/index.cjs"
     },
     "./adapter": {
-      "types": "./dist/adapters/index.d.ts",
-      "import": "./dist/adapters/index.js",
-      "require": "./dist/adapters/index.cjs"
+      "types": "./dist/auth/adapters/index.d.ts",
+      "import": "./dist/auth/adapters/index.js",
+      "require": "./dist/auth/adapters/index.cjs"
     },
     "./core": {
-      "types": "./dist/core/index.d.ts",
-      "import": "./dist/core/index.js",
-      "require": "./dist/core/index.cjs"
+      "types": "./dist/auth/core/index.d.ts",
+      "import": "./dist/auth/core/index.js",
+      "require": "./dist/auth/core/index.cjs"
     },
     "./providers": {
-      "types": "./dist/providers/index.d.ts",
-      "import": "./dist/providers/index.js",
-      "require": "./dist/providers/index.cjs"
+      "types": "./dist/auth/providers/index.d.ts",
+      "import": "./dist/auth/providers/index.js",
+      "require": "./dist/auth/providers/index.cjs"
     },
     "./adapters/memory": {
-      "types": "./dist/adapters/memory.d.ts",
-      "import": "./dist/adapters/memory.js",
-      "require": "./dist/adapters/memory.cjs"
+      "types": "./dist/auth/adapters/memory.d.ts",
+      "import": "./dist/auth/adapters/memory.js",
+      "require": "./dist/auth/adapters/memory.cjs"
     },
     "./adapters/mongoose": {
-      "types": "./dist/adapters/mongoose.d.ts",
-      "import": "./dist/adapters/mongoose.js",
-      "require": "./dist/adapters/mongoose.cjs"
+      "types": "./dist/auth/adapters/mongoose.d.ts",
+      "import": "./dist/auth/adapters/mongoose.js",
+      "require": "./dist/auth/adapters/mongoose.cjs"
     },
     "./adapters/drizzle": {
-      "types": "./dist/adapters/drizzle.d.ts",
-      "import": "./dist/adapters/drizzle.js",
-      "require": "./dist/adapters/drizzle.cjs"
+      "types": "./dist/auth/adapters/drizzle.d.ts",
+      "import": "./dist/auth/adapters/drizzle.js",
+      "require": "./dist/auth/adapters/drizzle.cjs"
     },
     "./adapters/prisma": {
-      "types": "./dist/adapters/prisma.d.ts",
-      "import": "./dist/adapters/prisma.js",
-      "require": "./dist/adapters/prisma.cjs"
+      "types": "./dist/auth/adapters/prisma.d.ts",
+      "import": "./dist/auth/adapters/prisma.js",
+      "require": "./dist/auth/adapters/prisma.cjs"
     },
     "./security": {
-      "types": "./dist/security/index.d.ts",
-      "import": "./dist/security/index.js",
-      "require": "./dist/security/index.cjs"
+      "types": "./dist/auth/security/index.d.ts",
+      "import": "./dist/auth/security/index.js",
+      "require": "./dist/auth/security/index.cjs"
     }
   },
   "files": [
