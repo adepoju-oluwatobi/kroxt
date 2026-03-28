@@ -1,8 +1,8 @@
 # Kroxt
 
-**The Obsidian Authentication Engine.**
+**The Most Simplified auth library**
 
-A premium, framework-agnostic, and security-hardened authentication library for modern TypeScript environments. Designed for 100% schema control and "Zero-Config" onboarding.
+Kroxt is a premium, framework-agnostic, and security-hardened authentication library for modern TypeScript environments. Designed for 100% schema control and "Zero-Config" onboarding.
 
 [![npm version](https://img.shields.io/npm/v/kroxt.svg)](https://www.npmjs.com/package/kroxt)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT)
