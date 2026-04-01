@@ -4,6 +4,9 @@
   "bin": {
     "kroxt": "./dist/cli/index.js"
   },
+  "publishConfig": {
+    "provenance": true
+  },
   "keywords": [
     "auth",
     "authentication",
