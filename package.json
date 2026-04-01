@@ -1,11 +1,8 @@
 {
   "name": "kroxt",
-  "version": "1.3.7",
+  "version": "1.3.10",
   "bin": {
-    "kroxt": "./dist/cli/index.js"
-  },
-  "publishConfig": {
-    "provenance": true
+    "kroxt": "dist/cli/index.js"
   },
   "homepage": "https://kroxt.vercel.app",
   "repository": {
@@ -88,8 +85,7 @@
     }
   },
   "files": [
-    "dist",
-    "README.md"
+    "dist"
   ],
   "scripts": {
     "build": "node build.js"
