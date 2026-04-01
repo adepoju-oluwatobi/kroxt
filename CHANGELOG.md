@@ -2,7 +2,7 @@
 
 All notable changes to the **Kroxt** authentication engine will be documented in this file.
 
-## [1.3.4] - 2026-03-29
+## [1.3.7] - 2026-04-01
 
 ### ✨ Added
 - **Kroxt CLI (`npx kroxt init`)**: A powerful, interactive command-line tool to bootstrap your `auth.ts` configuration, set up `.env` secrets, and generate `tsconfig.json` automatically.
