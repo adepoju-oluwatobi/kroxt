@@ -69,6 +69,16 @@ export function createMemoryAdapter<TUser extends User = User>(): AuthAdapter<TU
             const record = rateLimits.get(key);
             if (!record || now > record.resetTime) return null;
             return record;
+        },
+
+        invalidateSession: async (userId: string) => {
+            for (const [email, user] of users.entries()) {
+                if (user.id === userId) {
+                    const updatedUser = { ...user, sessionVersion: (user.sessionVersion || 0) + 1 } as TUser;
+                    users.set(email, updatedUser);
+                    return;
+                }
+            }
         }
     };
 }

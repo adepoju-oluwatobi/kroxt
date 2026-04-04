@@ -49,6 +49,15 @@ export function createPrismaAdapter<TUser extends User = User>(model: any, rateL
         },
       });
     },
+
+    async invalidateSession(id: string) {
+      await model.update({
+        where: { id },
+        data: {
+          sessionVersion: { increment: 1 },
+        },
+      });
+    },
   };
 
   if (rateLimitModel) {

@@ -2,14 +2,11 @@
 
 **The Most Simplified auth library**
 
-Kroxt is a premium, framework-agnostic, and security-hardened authentication library for modern TypeScript environments. Designed for 100% schema control and "Zero-Config" onboarding.
+Kroxt is a premium, framework-agnostic, and security-hardened authentication engine for modern TypeScript environments. Engineered for **Next.js (App Router)**, Express, and Fastify—with 100% schema control and "Zero-Config" onboarding.
 
 [![npm version](https://img.shields.io/npm/v/kroxt.svg)](https://www.npmjs.com/package/kroxt)
-[![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](https://opensource.org/licenses/MIT)
-
----
-
-## ⚡ 30-Second Onboarding
+[![Next.js Ready](https://img.shields.io/badge/Next.js-First--Class-black?logo=next.js)](https://nextjs.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 The recommended way to start is the **Kroxt CLI**. It detects your framework (Next.js, Express, Fastify) and scaffolds a professional auth structure automatically.
 
@@ -18,6 +15,40 @@ npx kroxt init
 ```
 
 ---
+
+## 🚀 Next.js First-Class Support
+
+Kroxt is optimized for the Next.js App Router. Use standard **Route Handlers** for high performance and zero overhead.
+
+### 1. Configuration (`lib/kroxt/auth.ts`)
+```typescript
+import { createAuth } from "kroxt";
+import { createMongoAdapter } from "kroxt/adapters/mongoose";
+import { User } from "./models/user.model";
+
+export const auth = createAuth({
+  adapter: createMongoAdapter(User),
+  secret: process.env.JWT_SECRET,
+  session: { enforceStrictRevocation: true } // Real-time security
+});
+```
+
+### 2. Login Route (`app/api/auth/login/route.ts`)
+```typescript
+import { auth } from "@/lib/kroxt/auth";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { email, password } = await req.json();
+    const result = await auth.loginWithPassword(email, password, req.ip);
+    
+    return NextResponse.json(result);
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+}
+```
 
 ## 🏗️ Core Architecture
 
@@ -119,16 +150,16 @@ Rotates the session. If `enforceStrictRevocation` is on, it validates the token 
 const { user, accessToken, refreshToken: newRefresh } = await auth.refreshSession(token);
 ```
 
-### `auth.logout(refreshToken)`
-Invalidates a session.
+### `auth.logout(userId)`
+Terminates all active sessions for a user globally. This increments the `sessionVersion` in the database, invalidating all current tokens instantly.
 ```typescript
-await auth.logout(refreshToken);
+await auth.logout(payload.sub);
 ```
 
 ### `auth.changePassword(userId, newPassword)`
 Updates password and **instantly invalidates all other active sessions** globally via Hash-Linked revocation.
 ```typescript
-await auth.changePassword(user.id, "new_secure_pass");
+await auth.changePassword(payload.sub, "new_secure_pass");
 ```
 
 ---
@@ -185,6 +216,14 @@ Kroxt supports server-side peppering to protect against rainbow table attacks ev
 | `password` | `string` | User password |
 | `clientIp` | `string` (Optional) | Required for IP-Blocking defense |
 
+### `auth.logout()`
+| Argument | Type | Description |
+| --- | --- | --- |
+| `userId` | `string` | The ID of the user whose sessions will be revoked |
+
+> [!IMPORTANT]
+> **Global Session Revocation**: Kroxt uses a `sessionVersion` counter. When `logout` is called, this counter increments in the database. Any token presented with an older version will be rejected during verification if `enforceStrictRevocation` is enabled or during session refreshes.
+
 ### `auth.changePassword()`
 | Argument | Type | Description |
 | --- | --- | --- |
@@ -192,7 +231,7 @@ Kroxt supports server-side peppering to protect against rainbow table attacks ev
 | `newPassword` | `string` | The new plain text password |
 
 > [!TIP]
-> **Hash-Linked Revocation**: When you call `changePassword`, all existing refresh tokens for that user are immediately invalidated because they contain a fragment of the old password hash.
+> **Hash-Linked Revocation**: When you call `changePassword`, all existing refresh tokens for that user are immediately invalidated because they contain a fragment of the old password hash (`pw_frag`).
 
 ---
 

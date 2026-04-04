@@ -89,6 +89,7 @@ export interface IUser extends Document {
   email: string;
   passwordHash?: string;
   role?: string;
+  sessionVersion: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -98,6 +99,7 @@ const UserSchema: Schema = new Schema(
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String },
     role: { type: String, default: "user" },
+    sessionVersion: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
@@ -105,13 +107,14 @@ const UserSchema: Schema = new Schema(
 export const User = mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
 `;
     case 'drizzle':
-      return `import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+      return `import { pgTable, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
   email: text("email").unique().notNull(),
   passwordHash: text("password_hash"),
   role: text("role").default("user"),
+  sessionVersion: integer("session_version").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -124,6 +127,7 @@ model User {
   email         String    @unique
   passwordHash  String?
   role          String    @default("user")
+  sessionVersion Int       @default(0)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
