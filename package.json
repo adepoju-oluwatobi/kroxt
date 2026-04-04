@@ -7,10 +7,10 @@
   "homepage": "https://kroxt.vercel.app",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adepoju-oluwatobi/kroxt.git"
+    "url": "git+https://github.com/kroxt/kroxt.git"
   },
   "bugs": {
-    "url": "https://github.com/adepoju-oluwatobi/kroxt/issues"
+    "url": "https://github.com/kroxt/kroxt/issues"
   },
   "author": "Adepoju Oluwatobi <https://github.com/adepoju-oluwatobi>",
   "keywords": [
