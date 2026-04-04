@@ -47,7 +47,12 @@ export function createAuth(options: CreateAuthOptions) {
      * Generates a stateless JWT for a user session
      */
     async function generateToken(user: User<any>, type: "access" | "refresh" = "access") {
-        let payload: Record<string, any> = { sub: user.id, role: user.role, type };
+        let payload: Record<string, any> = { 
+            sub: user.id, 
+            role: user.role, 
+            sv: user.sessionVersion || 0, // Include Session Version
+            type 
+        };
 
         // Lightweight Session Revocation: Link token to current password hash state
         if (user.passwordHash && (type === "refresh" || session?.enforceStrictRevocation)) {
@@ -75,10 +80,18 @@ export function createAuth(options: CreateAuthOptions) {
             const { payload } = await jwtVerify(token, encodedSecret);
             if (payload.type !== expectedType) return null;
 
-            if (expectedType === "access" && session?.enforceStrictRevocation && payload.pw_frag) {
+            if (expectedType === "access" && session?.enforceStrictRevocation) {
                 const user = await adapter.findUserById(payload.sub as string);
-                if (!user || payload.pw_frag !== user.passwordHash?.slice(-10)) {
+                if (!user) return null;
+
+                // Password change check
+                if (payload.pw_frag && payload.pw_frag !== user.passwordHash?.slice(-10)) {
                     throw new Error("Strict Revocation: Access Token revoked due to password change");
+                }
+
+                // Global Logout (Session Version) check
+                if (payload.sv !== (user.sessionVersion || 0)) {
+                    throw new Error("Strict Revocation: Session revoked (Logged out)");
                 }
             }
 
@@ -102,10 +115,13 @@ export function createAuth(options: CreateAuthOptions) {
             throw new Error("User not found");
         }
 
-        // Lightweight Session Revocation: Validate password hasn't changed since token issuance
-        if (payload.pw_frag && user.passwordHash) {
-            if (payload.pw_frag !== user.passwordHash.slice(-10)) {
+        // Lightweight Session Revocation (Password change & Session Version)
+        if (user.passwordHash) {
+            if (payload.pw_frag && payload.pw_frag !== user.passwordHash.slice(-10)) {
                 throw new Error("Session revoked (Password changed)");
+            }
+            if (payload.sv !== (user.sessionVersion || 0)) {
+                throw new Error("Session revoked (Logged out)");
             }
         }
 
@@ -217,10 +233,30 @@ export function createAuth(options: CreateAuthOptions) {
         return updatedUser;
     }
 
+    /**
+     * Terminate all active sessions for a user globally.
+     * This increments the session version in the database, invalidating all current tokens.
+     */
+    async function logout(userId: string) {
+        if (!adapter.invalidateSession) {
+            // If the adapter doesn't natively support it, we fall back to manual updateUser
+            if (adapter.updateUser) {
+                const user = await adapter.findUserById(userId);
+                const currentVersion = user?.sessionVersion || 0;
+                await adapter.updateUser(userId, { sessionVersion: currentVersion + 1 } as any);
+                return { success: true };
+            }
+            throw new Error("Logout failed: The AuthAdapter does not support session invalidation.");
+        }
+        await adapter.invalidateSession(userId);
+        return { success: true };
+    }
+
     return {
         signup,
         loginWithPassword,
         changePassword,
+        logout,
         refresh,
         verifyToken,
         generateToken,

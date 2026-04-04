@@ -56,6 +56,12 @@ export function createMongoAdapter<TUser extends User = User>(model: any, rateLi
         oauthId: providerId,
       });
     },
+
+    async invalidateSession(userId: string) {
+      await model.findByIdAndUpdate(userId, { 
+        $inc: { sessionVersion: 1 } 
+      });
+    },
   };
 
   if (rateLimitModel) {

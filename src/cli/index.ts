@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import enquirer from 'enquirer';
-const { prompt } = enquirer;
 import chalk from 'chalk';
 import fs from 'fs';
 import path from 'path';
@@ -32,14 +31,23 @@ program
         useStrictRevocation: true,
         usePepper: true,
         createModel: true,
-        targetDir: ''
+        targetDir: '',
+        modelDir: ''
       };
 
       const projectContext = getProjectContext();
-      const defaultDir = projectContext.isExpress ? (projectContext.hasSrc ? 'src/config' : 'config') : (projectContext.hasSrc ? 'src/lib/kroxt' : 'lib/kroxt');
+      let defaultDir = 'lib/kroxt';
+      
+      if (projectContext.isNext) {
+          defaultDir = 'lib/kroxt';
+      } else if (projectContext.isExpress || projectContext.isHono) {
+          defaultDir = projectContext.hasSrc ? 'src/config' : 'config';
+      } else if (projectContext.isVite) {
+          defaultDir = projectContext.hasSrc ? 'src/plugins/kroxt' : 'plugins/kroxt';
+      }
 
       if (!options.yes) {
-        response = await prompt([
+        const answers1 = await (enquirer as any).prompt([
           {
             type: 'select',
             name: 'adapter',
@@ -57,7 +65,10 @@ program
             name: 'targetDir',
             message: 'Where should I put the Kroxt files?',
             initial: defaultDir
-          },
+          }
+        ]);
+
+        const answers2 = await (enquirer as any).prompt([
           {
             type: 'confirm',
             name: 'useRateLimit',
@@ -87,14 +98,28 @@ program
             name: 'createModel',
             message: 'Create a boilerplate User model for you?',
             initial: true
-          },
-          {
-            type: 'confirm',
-            name: 'generateEnv',
-            message: 'Generate secure secrets in .env?',
-            initial: true
           }
-        ]) as any;
+        ]);
+
+        response = { ...response, ...answers1, ...answers2 };
+
+        if (response.createModel && response.adapter !== 'memory' && response.adapter !== 'none') {
+          const { modelDir } = await (enquirer as any).prompt({
+            type: 'input',
+            name: 'modelDir',
+            message: 'Where should I put the User model?',
+            initial: projectContext.isNext ? 'models/' : (projectContext.hasSrc ? 'src/models/' : 'models/')
+          });
+          response.modelDir = modelDir;
+        }
+
+        const { generateEnv } = await (enquirer as any).prompt({
+          type: 'confirm',
+          name: 'generateEnv',
+          message: 'Generate secure secrets in .env?',
+          initial: true
+        });
+        response.generateEnv = generateEnv;
       } else {
         console.log(chalk.gray('Using default settings (--yes)...'));
         response = {
@@ -132,15 +157,17 @@ program
       // Write User Model if requested
       if (response.createModel && response.adapter !== 'memory' && response.adapter !== 'none') {
         let modelPath = '';
+        const targetModelDir = response.modelDir || response.targetDir;
+        
         switch (response.adapter) {
           case 'mongoose':
-            modelPath = path.join(process.cwd(), response.targetDir, 'user.model.ts');
+            modelPath = path.join(process.cwd(), targetModelDir, 'user.model.ts');
             break;
           case 'drizzle':
-            modelPath = path.join(process.cwd(), response.targetDir, 'schema.ts');
+            modelPath = path.join(process.cwd(), targetModelDir, 'schema.ts');
             break;
           case 'prisma':
-            modelPath = path.join(process.cwd(), response.targetDir, 'user.prisma');
+            modelPath = path.join(process.cwd(), targetModelDir, 'user.prisma');
             break;
         }
 
@@ -193,6 +220,7 @@ async function checkAndInstallDeps(adapter: string, skipPrompts: boolean = false
     mongoose: ['kroxt', 'mongoose', 'dotenv'],
     prisma: ['kroxt', '@prisma/client', 'dotenv'],
     drizzle: ['kroxt', 'drizzle-orm', 'dotenv'],
+    hono: ['kroxt', 'hono', 'dotenv'],
     none: ['kroxt']
   };
 
@@ -203,12 +231,12 @@ async function checkAndInstallDeps(adapter: string, skipPrompts: boolean = false
     let confirm = true;
 
     if (!skipPrompts) {
-      const result = await prompt({
+      const result = await (enquirer as any).prompt({
         type: 'confirm',
         name: 'confirm',
         message: `Required dependencies are missing: ${chalk.cyan(missing.join(', '))}. Install them now?`,
         initial: true
-      }) as any;
+      });
       confirm = result.confirm;
     }
 
@@ -226,19 +254,29 @@ async function checkAndInstallDeps(adapter: string, skipPrompts: boolean = false
 }
 
 function getProjectContext() {
-  const hasSrc = fs.existsSync(path.join(process.cwd(), 'src'));
-  const pkgPath = path.join(process.cwd(), 'package.json');
+  const root = process.cwd();
+  const pkgPath = path.join(root, 'package.json');
+  const hasSrc = fs.existsSync(path.join(root, 'src'));
+  const hasAppRouter = fs.existsSync(path.join(root, 'app'));
+  const hasSrcAppRouter = fs.existsSync(path.join(root, 'src', 'app'));
+  const hasPagesRouter = fs.existsSync(path.join(root, 'pages'));
+  const hasSrcPagesRouter = fs.existsSync(path.join(root, 'src', 'pages'));
+  
   let isExpress = false;
   let isNext = false;
+  let isHono = false;
+  let isVite = false;
 
   if (fs.existsSync(pkgPath)) {
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
     isExpress = !!(deps.express || deps.fastify);
     isNext = !!deps.next;
+    isHono = !!deps.hono;
+    isVite = !!deps.vite;
   }
 
-  return { hasSrc, isExpress, isNext };
+  return { hasSrc, hasAppRouter, hasSrcAppRouter, hasPagesRouter, hasSrcPagesRouter, isExpress, isNext, isHono, isVite };
 }
 
 program.parse(process.argv);

@@ -48,6 +48,14 @@ export function createDrizzleAdapter<TUser extends User = User>(
         })
         .where(eq(table.id, userId));
     },
+
+    async invalidateSession(userId: string) {
+      await db.update(table)
+        .set({
+          sessionVersion: (table.sessionVersion || 0) + 1,
+        })
+        .where(eq(table.id, userId));
+    },
   };
 
   if (rateLimitTable) {

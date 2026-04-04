@@ -3,6 +3,7 @@ export interface BaseUser {
   email: string;
   passwordHash?: string;
   role?: string;
+  sessionVersion?: number;
 }
 
 // Allows any extended fields natively (like nin, bvn, maritalStatus, etc.)
@@ -16,4 +17,5 @@ export interface AuthAdapter<TUser = User> {
   linkOAuthAccount: (userId: string, provider: string, providerId: string) => Promise<void>;
   incrementRateLimit?: (key: string, windowMs: number) => Promise<{ count: number; resetTime: number }>;
   getRateLimit?: (key: string) => Promise<{ count: number; resetTime: number } | null>;
+  invalidateSession?: (userId: string) => Promise<void>;
 }
